@@ -11,8 +11,6 @@ from PyQt5 import QtGui
 
 
 class ShowVideo(QtCore.QObject):
-    flag = 0
-
     camera = cv2.VideoCapture(0)
 
     ret, image = camera.read()
@@ -42,26 +40,9 @@ class ShowVideo(QtCore.QObject):
             self.VideoSignal1.emit(qt_image1)
 
 
-            if self.flag:
-                img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                img_canny = cv2.Canny(img_gray, 50, 100)
-
-                qt_image2 = QtGui.QImage(img_canny.data,
-                                         self.width,
-                                         self.height,
-                                         img_canny.strides[0],
-                                         QtGui.QImage.Format_Grayscale8)
-
-                self.VideoSignal2.emit(qt_image2)
-
-
             loop = QtCore.QEventLoop()
             QtCore.QTimer.singleShot(25, loop.quit) #25 ms
             loop.exec_()
-
-    @QtCore.pyqtSlot()
-    def canny(self):
-        self.flag = 1 - self.flag
 
 
 class ImageViewer(QtWidgets.QWidget):
@@ -101,23 +82,21 @@ if __name__ == '__main__':
     vid.moveToThread(thread)
 
     image_viewer1 = ImageViewer()
-    image_viewer2 = ImageViewer()
 
     vid.VideoSignal1.connect(image_viewer1.setImage)
-    vid.VideoSignal2.connect(image_viewer2.setImage)
 
-    push_button1 = QtWidgets.QPushButton('Start')
-    push_button2 = QtWidgets.QPushButton('Canny')
+    push_button1 = QtWidgets.QPushButton('Start Video')
+    push_button2 = QtWidgets.QPushButton('Stop Video')
+    push_button3 = QtWidgets.QPushButton('Capture')
+
     push_button1.clicked.connect(vid.startVideo)
-    push_button2.clicked.connect(vid.canny)
+
 
     vertical_layout = QtWidgets.QVBoxLayout()
     horizontal_layout = QtWidgets.QHBoxLayout()
     horizontal_layout.addWidget(image_viewer1)
-    horizontal_layout.addWidget(image_viewer2)
     vertical_layout.addLayout(horizontal_layout)
     vertical_layout.addWidget(push_button1)
-    vertical_layout.addWidget(push_button2)
 
     layout_widget = QtWidgets.QWidget()
     layout_widget.setLayout(vertical_layout)
