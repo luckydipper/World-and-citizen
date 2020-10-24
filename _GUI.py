@@ -3,11 +3,16 @@ date : 2020/10/23
 copy from https://webnautes.tistory.com/1290
 next thing I have to do is combine Grapic_User_interface.py & _GUI.py module
 """
+from IPython.utils import capture
 import cv2
 import sys
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
+
+from PyQt5.QtGui import QIcon
+from pyasn1.compat import binary
+from six import binary_type
 
 
 class ShowVideo(QtCore.QObject):
@@ -25,7 +30,8 @@ class ShowVideo(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def startVideo(self):
-        global image
+        
+        capture_variable = 0 # if capture_variable is 1 -> capture and convert to language
 
         run_video = True
         while run_video:
@@ -38,18 +44,27 @@ class ShowVideo(QtCore.QObject):
                                     color_swapped_image.strides[0],
                                     QtGui.QImage.Format_RGB888)
             self.VideoSignal1.emit(qt_image1)
-
+            
+            self._senseCapture()
 
             loop = QtCore.QEventLoop()
             QtCore.QTimer.singleShot(25, loop.quit) #25 ms
             loop.exec_()
 
+    def _senseCapture(self) -> bool:
+        """If Capture button is clicked, return True else return False"""
+        
+        return True
+        
+    def __capture(self) -> None:
+        return None
 
 class ImageViewer(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(ImageViewer, self).__init__(parent)
         self.image = QtGui.QImage()
         self.setAttribute(QtCore.Qt.WA_OpaquePaintEvent)
+        self.initUI()
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
@@ -58,7 +73,10 @@ class ImageViewer(QtWidgets.QWidget):
 
     def initUI(self):
         self.setWindowTitle('CITIZEN PROJ')
-
+        self.setWindowIcon(QIcon('./resource/images/networking.png'))
+        self.move(300,300)
+        self.resize(1000,800)
+    
     @QtCore.pyqtSlot(QtGui.QImage)
     def setImage(self, image):
         if image.isNull():
