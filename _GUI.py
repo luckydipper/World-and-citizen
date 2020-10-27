@@ -4,6 +4,7 @@ copy from https://webnautes.tistory.com/1290
 next thing I have to do is combine Grapic_User_interface.py & _GUI.py module
 """
 from IPython.utils import capture
+import numpy as np
 import cv2
 import sys
 from PyQt5 import QtCore
@@ -21,18 +22,28 @@ class ShowVideo(QtCore.QObject):
 
     VideoSignal1 = QtCore.pyqtSignal(QtGui.QImage)
 
+    run_video = True
+
     def __init__(self, parent=None):
         super(ShowVideo, self).__init__(parent)
+
+    def stopVideo(self):
+        self.run_video = False
+        return None
 
     @QtCore.pyqtSlot()
     def startVideo(self):
         
-        capture_variable = 0 # if capture_variable is 1 -> capture and convert to language
+        self.run_video = True
 
-        run_video = True
-        while run_video:
+        capture_variable = False # if capture_variable is 1 -> capture and convert to language
+
+        while self.run_video:
             ret, image = self.camera.read()
             color_swapped_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+            if capture_variable == True:
+                callCaptureImage(image)
             
             qt_image1 = QtGui.QImage(color_swapped_image.data, # ndarray data attribute 버퍼객체의 시작을 가르킨다는데 잘 모르겠음.
                                     self.width,
@@ -48,9 +59,6 @@ class ShowVideo(QtCore.QObject):
         """If Capture button is clicked, return True else return False"""
         
         return True
-        
-    def __capture(self) -> None:
-        return None
 
 class ImageViewer(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -80,8 +88,12 @@ class ImageViewer(QtWidgets.QWidget):
             self.setFixedSize(image.size())
         self.update()
 
-def say_hello():
-    print("button clicked, Hello")
+
+def callCaptureImage(image: np.ndarray):
+    print("image Captured")
+
+    return None
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
@@ -102,14 +114,12 @@ if __name__ == '__main__':
     push_button3 = QtWidgets.QPushButton('Capture')
 
     push_button1.clicked.connect(vid.startVideo)
-
+    push_button2.clicked.connect(vid.stopVideo)
+    push_button3.clicked.connect(callCaptureImage)
 
     vertical_layout = QtWidgets.QVBoxLayout()
     horizontal_layout = QtWidgets.QHBoxLayout()
-
     
-    push_button1.clicked.connect(say_hello)
-
     vertical_layout.addLayout(horizontal_layout)
     vertical_layout.addWidget(push_button1)
     vertical_layout.addWidget(push_button2)
