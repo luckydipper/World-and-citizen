@@ -3,7 +3,6 @@ date : 2020/10/23
 copy from https://webnautes.tistory.com/1290
 next thing I have to do is combine Grapic_User_interface.py & _GUI.py module
 """
-from IPython.utils import capture
 from PyQt5.QtWidgets import QWidget
 import numpy as np
 import cv2
@@ -41,6 +40,7 @@ class ShowVideo(QtCore.QObject):
 
         while self.run_video:
             ret, image = self.camera.read()
+            image =  cv2.flip(image, 1)# 1은 좌우 반전 0은 상하 반전
             color_swapped_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
             if self.capture_variable == True:
@@ -72,20 +72,14 @@ class ImageViewer(QtWidgets.QWidget):
         super(ImageViewer, self).__init__(parent)
         self.image = QtGui.QImage()
         self.setAttribute(QtCore.Qt.WA_OpaquePaintEvent)
-        self.initUI()
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
         painter.drawImage(0, 0, self.image)
         self.image = QtGui.QImage()
 
-    def initUI(self):
-        self.setWindowTitle('CITIZEN PROJ')
-        self.setWindowIcon(QIcon('./resource/images/networking.png'))
-        self.move(300,300)
-        self.resize(500,800)
-    
-    @QtCore.pyqtSlot(QtGui.QImage)
+
+    @QtCore.pyqtSlot(QtGui.QImage) 
     def setImage(self, image):
         if image.isNull():
             print("Viewer Dropped frame!")
@@ -117,6 +111,9 @@ if __name__ == '__main__':
     push_button1 = QtWidgets.QPushButton('Start Video')
     push_button2 = QtWidgets.QPushButton('Stop Video')
     push_button3 = QtWidgets.QPushButton('Capture')
+    
+    result_box = QtWidgets.QLabel('result')
+    result_line = QtWidgets.QLineEdit()
 
     push_button1.clicked.connect(vid.startVideo)
     push_button2.clicked.connect(vid.stopVideo)
@@ -124,16 +121,24 @@ if __name__ == '__main__':
 
     vertical_layout = QtWidgets.QVBoxLayout()
     horizontal_layout = QtWidgets.QHBoxLayout()
+    greed_layout = QtWidgets.QGridLayout()
     
     vertical_layout.addLayout(horizontal_layout)# layout 위에 layout 넣을 수 있군.
     vertical_layout.addWidget(push_button1)
     vertical_layout.addWidget(push_button2)
     vertical_layout.addWidget(push_button3)
+    vertical_layout.addLayout(greed_layout)
+
+    greed_layout.addWidget(result_box,1,0)
+    greed_layout.addWidget(result_line,1,1)
     horizontal_layout.addWidget(image_viewer1)
+
     layout_widget = QtWidgets.QWidget()
     layout_widget.setLayout(vertical_layout)
 
     main_window = QtWidgets.QMainWindow()
     main_window.setCentralWidget(layout_widget)
+    main_window.setWindowTitle('CITIZEN PROJ')
+    main_window.setWindowIcon(QIcon('./resource/images/networking.png'))
     main_window.show()
     sys.exit(app.exec_())
