@@ -3,6 +3,7 @@ date : 2020/10/23
 copy from https://webnautes.tistory.com/1290
 next thing I have to do is combine Grapic_User_interface.py & _GUI.py module
 """
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget
 import numpy as np
 import cv2
@@ -11,6 +12,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 from PyQt5.QtGui import QIcon
+import image2language
 
 
 class ShowVideo(QtCore.QObject):
@@ -23,6 +25,7 @@ class ShowVideo(QtCore.QObject):
     VideoSignal1 = QtCore.pyqtSignal(QtGui.QImage)
 
     run_video = True
+
 
     def __init__(self, parent=None):
         super(ShowVideo, self).__init__(parent)
@@ -45,7 +48,7 @@ class ShowVideo(QtCore.QObject):
 
             if self.capture_variable == True:
                 print("image Captured")
-                external_function(image)
+                get_language(image, mode=0)
             
             qt_image1 = QtGui.QImage(color_swapped_image.data, # ndarray data attribute 버퍼객체의 시작을 가르킨다는데 잘 모르겠음.
                                     self.width,
@@ -90,13 +93,20 @@ class ImageViewer(QtWidgets.QWidget):
         self.update()
 
 
-def external_function(image: np.ndarray):
-    print(image)
+def get_language(image: np.ndarray, mode):
+    if mode == 0: # number
+        result = image2language.number(image)
+    else:
+        result = "error"
+    print(result)
+    print(mode_combo_box.currentIndex())
+    print(mode_combo_box.currentText())
+    result_line.setText(result)
+    return result
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-
 
     thread = QtCore.QThread()
     thread.start()
@@ -111,6 +121,11 @@ if __name__ == '__main__':
     push_button1 = QtWidgets.QPushButton('Start Video')
     push_button2 = QtWidgets.QPushButton('Stop Video')
     push_button3 = QtWidgets.QPushButton('Capture')
+    mode_combo_box = QtWidgets.QComboBox()
+    mode_combo_box.addItem('숫자')
+    mode_combo_box.addItem('음소')
+    mode_combo_box.addItem('단어')
+    save_button = QtWidgets.QPushButton('save')
     
     result_box = QtWidgets.QLabel('result')
     result_line = QtWidgets.QLineEdit()
@@ -127,10 +142,12 @@ if __name__ == '__main__':
     vertical_layout.addWidget(push_button1)
     vertical_layout.addWidget(push_button2)
     vertical_layout.addWidget(push_button3)
+    vertical_layout.addWidget(mode_combo_box)
     vertical_layout.addLayout(greed_layout)
 
-    greed_layout.addWidget(result_box,1,0)
-    greed_layout.addWidget(result_line,1,1)
+    greed_layout.addWidget(result_box, 1, 0)
+    greed_layout.addWidget(result_line, 1, 1)
+    greed_layout.addWidget(save_button, 1, 2)
     horizontal_layout.addWidget(image_viewer1)
 
     layout_widget = QtWidgets.QWidget()
